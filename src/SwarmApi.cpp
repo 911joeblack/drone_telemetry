@@ -1,27 +1,25 @@
 #include "SwarmApi.h"
-#include <iostream>
 
 class SwarmApi::SwarmApiImpl {
 // The actual implementation of the functions and 
 // All member vars go in here
 public:
-    SwarmApiImpl() 
-        : dummy(10)
-    {}
+    SwarmApiImpl() = default;
 
     void subscribe(TelemetryCallback callback) {
-        return;
+        callbacks_.push_back(std::move(callback));
     }
 
     void publish(std::span<const DroneTelemetry> packets) {
-        return;
-    }
-
-    void testPIMPL() {
-        std::cout << "Testing PIMPL functionality" << dummy << std::endl;
+        for(const auto& packet : packets) {
+            for(const auto& cb : callbacks_) {
+                cb(packet);
+            }
+        }
     }
 private:
-    int32_t dummy;
+    // We have a list of 
+    std::vector<TelemetryCallback> callbacks_;
 };
 
 // We must define all our constructors here
@@ -50,15 +48,5 @@ void SwarmApi::publish(std::span<const DroneTelemetry> packets) {
     pIMPL->SwarmApiImpl::publish(packets);
 }
 
-// temp func
-void SwarmApi::testPIMPL() {
-    pIMPL->SwarmApiImpl::testPIMPL();
-}
-
 // Destructor goes last
 SwarmApi::~SwarmApi() = default;
-
-
-// void dummyClass::printHello() {
-//     std::cout << m_str;
-// }

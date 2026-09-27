@@ -37,9 +37,6 @@ public:
     // contiguous memory
     void publish(std::span<const DroneTelemetry> packets);
 
-    // temp func
-    void testPIMPL();
-
 private:
     // Forward Declaration of the implementation class
     class SwarmApiImpl;

@@ -1,18 +1,22 @@
-cmake_minimum_required(VERSION 4.2)
-set(PROJECT_NAME drone_telemetry)
+cmake_minimum_required(VERSION 3.20)
+set(PROJECT_NAME SimulationPlatform)
 
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(BUILD_TESTING TRUE)
 
-file(GLOB_RECURSE SRCS "src/*.cpp")
-file(GLOB_RECURSE HDRS "include/*.h")
+# Make our custom cmake available globally
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(ProjectMacros)
 
-add_executable(${PROJECT_NAME} ${SRCS} ${HDRS})
+if(BUILD_TESTING)
+    include(GTest_Dependencies)
+    enable_testing()
+endif()
 
-target_include_directories(${PROJECT_NAME} 
-    PRIVATE src
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-    $<INSTALL_INTERFACE:inc>
-)
+# Begin Compiling Everything
+add_subdirectory(Libraries)
+add_subdirectory(Entities)

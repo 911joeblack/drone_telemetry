@@ -1,28 +1,33 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
+# Exit immediately if any command fails
 set -e
 
-# Define directories
-BUILD_DIR="build"
+CLEAN=false
 
-# Clean previous build artifacts if they exist
-if [ -d "$BUILD_DIR" ]; then
-    echo "Cleaning previous build directory..."
-    rm -rf "$BUILD_DIR"
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -c|--clean) CLEAN=true; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+done
+
+# 1. Clean if requested
+if [ "$CLEAN" = true ]; then
+    echo "Cleaning build dirs"
+    rm -rf build
 fi
 
-# Create a fresh build folder
-echo "Creating fresh build directory..."
-mkdir "$BUILD_DIR"
+# 2. Configure (CMake is smart enough to skip work if nothing changed in the CMakeLists)
+echo "Configuring project"
+cmake -S . -B build
 
-# Navigate into the build directory
-cd "$BUILD_DIR"
+# 3. Build (Using all available CPU cores)
+echo "Building project"
+# $(nproc) dynamically gets the number of CPU cores on Linux/WSL
+cmake --build build -j$(nproc)
 
-# Configure the project using CMake
-echo "Configuring project with CMake..."
-cmake ..
-
-# Build the project
-echo "Building project..."
-cmake --build .
+# 4. Test
+echo "Running tests"
+ctest --test-dir build --output-on-failure
